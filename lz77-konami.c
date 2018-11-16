@@ -222,7 +222,6 @@ char *Decode(size_t ilen, unsigned char *istr, size_t *olen) {
   unsigned short w;
 
   char *ostr = malloc(ilen);
-  char *ostr_start = ostr;
 
   int limit = ilen;
 
@@ -257,11 +256,11 @@ char *Decode(size_t ilen, unsigned char *istr, size_t *olen) {
         }
         if (-1 * position + length < 0) {
           for (int j = 0; j < length; j++) {
-            _put(*(ostr_start + *olen - length + j));
+            _put(*(ostr + *olen - position + j));
           }
         } else {
           for (int j = 0; j < length; j++) {
-            _put(*(ostr_start + *olen - length));
+            _put(*(ostr + *olen - position));
           }
         }
       }
