@@ -6,7 +6,7 @@ void decode_test(size_t ilen, unsigned char *istr, char *cstr) {
   size_t olen = 0;
 
   char *decoded = Decode(ilen, istr, &olen);
-  if (strcmp(decoded, cstr) == 0) {
+  if (memcmp(decoded, cstr, olen) == 0) {
     printf("OK\n\n");
   } else {
     printf("invalid! decoded: %s\n\n", decoded);
