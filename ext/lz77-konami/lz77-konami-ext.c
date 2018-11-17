@@ -1,9 +1,10 @@
+#include "lz77-konami.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <ruby.h>
 
-#include "lz77-konami.h"
 
 #ifndef HAVE_FMEMOPEN
 #define HAVE_FMEMOPEN

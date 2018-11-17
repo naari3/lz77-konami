@@ -18,7 +18,7 @@ FILE *open_memstream(char **buf, size_t *len);
 
 
 void *memrmem(const void *v, size_t size, const void *pat, size_t patsize) {
-  const char *p;
+  const char *p = "";
 
   assert(v != NULL);
   assert(pat != NULL);
@@ -137,9 +137,9 @@ Window match_window(char *istr, size_t ilen, int offset) {
 
 size_t Encode(size_t ilen_, char *istr_, size_t olen, char *ostr) {
   char *istr = malloc(ilen_ + WINDOW_SIZE);
-  for (int i; i < WINDOW_SIZE; i++)
+  for (int i = 0; i < WINDOW_SIZE; i++)
     *(istr + i) = 0;
-  for (int i; i < ilen_; i++)
+  for (int i = 0; i < ilen_; i++)
     *(istr + i + WINDOW_SIZE) = *(istr_ + i);
   size_t ilen = ilen_ + WINDOW_SIZE;
   int current_pos = WINDOW_SIZE;
@@ -229,7 +229,6 @@ char *Decode(size_t ilen, char *istr, size_t *olen) {
 
   char *ostr = malloc(ilen);
 
-  int limit = ilen;
   *olen = 0;
 
   FILE *input_str = fmemopen(istr, ilen, "rb");
