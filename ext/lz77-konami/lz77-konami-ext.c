@@ -32,7 +32,7 @@ static VALUE decode(VALUE self, VALUE str) {
   return ret;
 }
 
-void Init_lz77_konami() {
+void Init_konami() {
   VALUE LZ77 = rb_define_module("LZ77");
   VALUE Konami = rb_define_module_under(LZ77, "Konami");
   rb_define_module_function(Konami, "encode", RUBY_METHOD_FUNC(encode), 1);
