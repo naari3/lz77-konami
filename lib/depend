@@ -1,0 +1,3 @@
+lz77-konami-ext.o: lz77-konami-ext.c lz77-konami.h mem/fmemopen.h
+lz77-konami.o: lz77-konami.c lz77-konami.h mem/fmemopen.h
+test.o: test.c lz77-konami.h

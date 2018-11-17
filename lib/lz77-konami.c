@@ -6,9 +6,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef HAVE_FMEMOPEN
+#define HAVE_FMEMOPEN
 #include "mem/fmemopen.h"
+#endif // HAVE_FMEMOPEN
 
+#ifndef HAVE_OPEN_MEMSTREAM
+#define HAVE_OPEN_MEMSTREAM
 FILE *open_memstream(char **buf, size_t *len);
+#endif // HAVE_OPEN_MEMSTREAM
+
 
 void *memrmem(const void *v, size_t size, const void *pat, size_t patsize) {
   const char *p;
