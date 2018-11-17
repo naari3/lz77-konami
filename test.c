@@ -23,7 +23,7 @@ int encode_test(size_t ilen, char *istr, size_t validlen, char *validstr) {
   int result;
   char *encoded = malloc(ilen * 2);
   size_t olen = Encode(ilen, istr, ilen * 2, encoded);
-  if (memcmp(encoded, validstr, olen) == 0) {
+  if (memcmp(encoded, validstr, olen) == 0 && olen == validlen) {
     printf("OK\n\n");
     result = 0;
   } else {
@@ -37,7 +37,7 @@ int decode_test(size_t ilen, char *istr, size_t validlen, char *validstr) {
   size_t olen = 0;
 
   char *decoded = Decode(ilen, istr, &olen);
-  if (memcmp(decoded, validstr, olen) == 0) {
+  if (memcmp(decoded, validstr, olen) == 0 && olen == validlen) {
     printf("OK\n\n");
     return 0;
   } else {
