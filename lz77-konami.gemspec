@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.summary       = 'support konami compression'
   spec.description   = spec.summary
   spec.homepage      = 'http://gitlab.com/naari3/lz77-konami'
-  spec.extensions    = %w[ext/lz77-konami/extconf.rb]
+  spec.extensions    = %w[ext/lz77/konami/extconf.rb]
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
