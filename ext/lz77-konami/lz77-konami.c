@@ -42,12 +42,12 @@ void *memrmem(const void *v, size_t size, const void *pat, size_t patsize) {
 #define N 4096 /* size of ring buffer */
 #define F 18   /* upper limit for match_length */
 
-const int WINDOW_SIZE = 0x1000;
-const int WINDOW_MASK = WINDOW_SIZE - 1;
-const int THRESHOLD = 3;
-const int INPLACE_THRESHOLD = 0xA;
-const int LOOK_RANGE = 0x200;
-const int MAX_LEN = 0xF + THRESHOLD;
+const size_t WINDOW_SIZE = 0x1000;
+const size_t WINDOW_MASK = WINDOW_SIZE - 1;
+const size_t THRESHOLD = 3;
+const size_t INPLACE_THRESHOLD = 0xA;
+const size_t LOOK_RANGE = 0x200;
+const size_t MAX_LEN = 0xF + THRESHOLD;
 
 // -1が入ってたら無かったと思うこと
 typedef struct Window {
@@ -85,14 +85,14 @@ typedef struct Window {
 
 // Find the longest match for the string starting at offset
 //   in the preceeding data
-Window match_window(char *istr, size_t ilen, int offset) {
-  int window_start = MAX(offset - WINDOW_MASK, 0);
-  int window_end, idx, code_offset, code_len, str_to_find_len, in_data_len;
+Window match_window(char *istr, size_t ilen, size_t offset) {
+  size_t window_start = MAX(offset - WINDOW_MASK, 0);
+  size_t window_end, idx, code_offset, code_len, str_to_find_len, in_data_len;
   char *ret, *str_to_find, *in_data;
 
   Window window = {-1, -1};
 
-  for (int i = MAX_LEN; i > THRESHOLD - 1; i--) {
+  for (size_t i = MAX_LEN; i > THRESHOLD - 1; i--) {
     // printf("win %u\n", i);
     window_end = MIN(offset + i, ilen);
     // printf("win end %u\n", window_end);
@@ -105,13 +105,13 @@ Window match_window(char *istr, size_t ilen, int offset) {
 
     str_to_find_len = window_end - offset;
     str_to_find = malloc(str_to_find_len + 1);
-    for (int j = 0; j < str_to_find_len; j++) {
+    for (size_t j = 0; j < str_to_find_len; j++) {
       *(str_to_find + j) = *(istr + j + offset);
     }
     *(str_to_find + str_to_find_len) = 0; // for debug
     in_data_len = window_end - window_start - i;
     in_data = malloc(in_data_len);
-    for (int j = 0; j < in_data_len; j++) {
+    for (size_t j = 0; j < in_data_len; j++) {
       *(in_data + j) = *(istr + j + window_start);
     }
     // printf("find string %s\n", str_to_find);
@@ -137,27 +137,27 @@ Window match_window(char *istr, size_t ilen, int offset) {
 
 size_t Encode(size_t ilen_, char *istr_, size_t olen, char *ostr) {
   char *istr = malloc(ilen_ + WINDOW_SIZE);
-  for (int i = 0; i < WINDOW_SIZE; i++)
+  for (size_t i = 0; i < WINDOW_SIZE; i++)
     *(istr + i) = 0;
-  for (int i = 0; i < ilen_; i++)
+  for (size_t i = 0; i < ilen_; i++)
     *(istr + i + WINDOW_SIZE) = *(istr_ + i);
   size_t ilen = ilen_ + WINDOW_SIZE;
-  int current_pos = WINDOW_SIZE;
+  size_t current_pos = WINDOW_SIZE;
   char *istr_start = istr;
   Window match;
-  int win_pos, win_length;
+  size_t win_pos, win_length;
   unsigned short win_info;
 
   olen = 0;
 
-  int bit = 0;
+  size_t bit = 0;
 
-  int flag_byte;
+  size_t flag_byte;
   size_t buf_size = 33;
   size_t buf_limit = buf_size;
   size_t buflen = 0;
   char *buf = malloc(buf_size);
-  for (int i = 0; i < buf_size; i++)
+  for (size_t i = 0; i < buf_size; i++)
     *(buf + i) = 0;
   char *buf_start = buf;
 
@@ -165,7 +165,7 @@ size_t Encode(size_t ilen_, char *istr_, size_t olen, char *ostr) {
     // printf("current_pos %u\n", current_pos);
     // printf("input_size %lu\n", ilen);
     flag_byte = 0;
-    for (int i = 0; i < 8; i++) {
+    for (size_t i = 0; i < 8; i++) {
       // printf("current_pos %u\n", current_pos);
       // printf("input_size %lu\n", ilen);
       // printf("buffer %s\n", buf_start);
@@ -196,7 +196,7 @@ size_t Encode(size_t ilen_, char *istr_, size_t olen, char *ostr) {
     }
     _put(flag_byte);
     // printf("put buffers \n");
-    for (int i = 0; i < buflen; i++) {
+    for (size_t i = 0; i < buflen; i++) {
       _put(*(buf_start + i));
     }
   }
@@ -236,7 +236,7 @@ char *Decode(size_t ilen, char *istr, size_t *olen) {
 
   for (;;) {
     _get(flag);
-    for (int i = 0; i < 8; i++) {
+    for (size_t i = 0; i < 8; i++) {
       if (((flag >> i) & 1) == 1) {
         _get(c);
         _put(c);
@@ -254,14 +254,14 @@ char *Decode(size_t ilen, char *istr, size_t *olen) {
         if (position > *olen) {
           diff = position - *olen;
           diff = MIN(diff, length);
-          for (int j = 0; j < diff; j++)
+          for (size_t j = 0; j < diff; j++)
             _put(0);
           length -= diff;
         }
         if (-1 * position + length < 0) {
           fwrite(ostr + *olen - position, sizeof(char), length, output_str);
         } else {
-          for (int j = 0; j < length; j++) {
+          for (size_t j = 0; j < length; j++) {
             _put(*(ostr + *olen - position));
           }
         }
