@@ -10,9 +10,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ['naari3']
   spec.email         = ['naari.named@gmail.com']
 
-  spec.summary       = 'konami compression'
+  spec.summary       = 'support konami compression'
   spec.description   = spec.summary
-  spec.homepage      = "http://example.com"
+  spec.homepage      = 'http://gitlab.com/naari3/lz77-konami'
   spec.extensions    = %w[ext/lz77-konami/extconf.rb]
 
   # Specify which files should be added to the gem when it is released.

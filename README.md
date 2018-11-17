@@ -1,8 +1,6 @@
 # Lz77::Konami
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/lz77/konami`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+konami's lz77
 
 ## Installation
 
@@ -22,7 +20,12 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+encoded = LZ77::Konami.encode("howdy!" + ":) " * 10)
+# => "\xFFhowdy!:)\x01 \x000\x00c\x00\xC9\x01#\x00\x00\x00"
+LZ77::Konami.decode(encoded)
+# => "howdy!:) :) :) :) :) :) :) :) :) :) "
+```
 
 ## Development
 
@@ -32,4 +35,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/lz77-konami.
+Bug reports and pull requests are welcome on GitHub at https://gitlab.com/naari3/lz77-konami.
