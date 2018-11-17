@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mem/fmemopen.h"
+
+FILE *open_memstream(char **buf, size_t *len);
+
 void *memrmem(const void *v, size_t size, const void *pat, size_t patsize) {
   const char *p;
 
@@ -199,25 +203,31 @@ size_t Encode(size_t ilen_, unsigned char *istr_, size_t olen,
   return olen;
 }
 
+#undef _get
 #undef _put
 #undef _put_buf
+
+#define _get(c)                                                                \
+  c = fgetc(input_str);                                                        \
+  if (c == EOF) {                                                              \
+    break;                                                                     \
+  }
+
 #define _put(c)                                                                \
-  if (*olen == limit) {                                                        \
-    limit *= 2;                                                                \
-    ostr = realloc(ostr, limit);                                               \
-  }                                                                            \
-  ostr[*olen] = c;                                                             \
-  *olen += 1
+  fputc(c, output_str);                                                        \
+  *olen = ftell(output_str);
 
 unsigned char *Decode(size_t ilen, unsigned char *istr, size_t *olen) {
   int c, h, l, flag, position, length, diff;
   unsigned short w;
 
-  unsigned char *ostr = malloc(ilen);
+  char *ostr = malloc(ilen);
 
   int limit = ilen;
-
   *olen = 0;
+
+  FILE *input_str = fmemopen(istr, ilen, "rb");
+  FILE *output_str = open_memstream(&ostr, olen);
 
   for (;;) {
     _get(flag);
@@ -231,13 +241,10 @@ unsigned char *Decode(size_t ilen, unsigned char *istr, size_t *olen) {
         w = (((short)h) << 8) | (0xff & l);
         position = (w >> 4);
         length = (w & 0x0F) + THRESHOLD;
-        // printf("high %u\n", h);
-        // printf("low %u\n", l);
-        // printf("%u\n", w);
-        // printf("position, %u\n", position);
-        // printf("length, %u\n\n", length);
         if (position == 0) {
-          return ostr;
+          fclose(input_str);
+          fclose(output_str);
+          return (unsigned char *)ostr;
         }
         if (position > *olen) {
           diff = position - *olen;
@@ -247,9 +254,7 @@ unsigned char *Decode(size_t ilen, unsigned char *istr, size_t *olen) {
           length -= diff;
         }
         if (-1 * position + length < 0) {
-          for (int j = 0; j < length; j++) {
-            _put(*(ostr + *olen - position + j));
-          }
+          fwrite(ostr + *olen - position, sizeof(char), length, output_str);
         } else {
           for (int j = 0; j < length; j++) {
             _put(*(ostr + *olen - position));
@@ -258,7 +263,9 @@ unsigned char *Decode(size_t ilen, unsigned char *istr, size_t *olen) {
       }
     }
   }
-  return ostr;
+  fclose(input_str);
+  fclose(output_str);
+  return (unsigned char *)ostr;
 }
 
 #undef _get
