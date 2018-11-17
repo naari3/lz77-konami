@@ -10,36 +10,42 @@ void print_hex(unsigned char *istr, size_t ilen) {
   printf("\n");
 }
 
-void encode_test(size_t ilen, unsigned char *istr, size_t validlen,
-                 unsigned char *validstr) {
+void print_invalid(unsigned char *expstr, size_t explen, unsigned char *gotstr,
+                   size_t gotlen) {
+  printf("invalid!\n");
+  printf("expected: ");
+  print_hex(expstr, explen);
+  printf("got:      ");
+  print_hex(gotstr, gotlen);
+  printf("\n");
+}
+
+int encode_test(size_t ilen, unsigned char *istr, size_t validlen,
+                unsigned char *validstr) {
+  int result;
   unsigned char *encoded = malloc(ilen * 2);
   size_t olen = Encode(ilen, istr, ilen * 2, encoded);
   if (memcmp(encoded, validstr, olen) == 0) {
     printf("OK\n\n");
+    result = 0;
   } else {
-    printf("invalid!\n");
-    printf("expected: ");
-    print_hex(validstr, validlen);
-    printf("got:      ");
-    print_hex(encoded, olen);
-    printf("\n");
+    print_invalid(validstr, validlen, encoded, olen);
+    result = 1;
   }
   free(encoded);
+  return result;
 }
-void decode_test(size_t ilen, unsigned char *istr, size_t validlen,
-                 unsigned char *validstr) {
+int decode_test(size_t ilen, unsigned char *istr, size_t validlen,
+                unsigned char *validstr) {
   size_t olen = 0;
 
   unsigned char *decoded = Decode(ilen, istr, &olen);
   if (memcmp(decoded, validstr, olen) == 0) {
     printf("OK\n\n");
+    return 0;
   } else {
-    printf("invalid!\n");
-    printf("expected: ");
-    print_hex(validstr, validlen);
-    printf("got:      ");
-    print_hex(decoded, olen);
-    printf("\n");
+    print_invalid(validstr, validlen, decoded, olen);
+    return 1;
   }
 }
 
@@ -71,7 +77,9 @@ int main() {
   printf("match window memrmem test\n");
   encode_test(
       40, (unsigned char *)"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", //
-      15, (unsigned char *)"\x07\x61\x61\x61\x00\x30\x00\x63\x00\xc9\x01\x2d\x00\x00\x00");
+      15,
+      (unsigned char
+           *)"\x07\x61\x61\x61\x00\x30\x00\x63\x00\xc9\x01\x2d\x00\x00\x00");
 
   return 0;
 }
