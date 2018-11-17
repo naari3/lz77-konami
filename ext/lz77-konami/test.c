@@ -58,6 +58,9 @@ int main() {
   decode_test(15,
               "\x07\x61\x61\x61\x00\x30\x00\x63\x00\xc9\x01\x2d\x00\x00\x00",
               40, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+  printf("invalid value test\n");
+  decode_test(1, "a", //
+              0, "");
   // printf("0 padding test\n"); // TODO
 
   printf("=== encode ===\n");
@@ -71,6 +74,10 @@ int main() {
   encode_test(40, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", //
               15,
               "\x07\x61\x61\x61\x00\x30\x00\x63\x00\xc9\x01\x2d\x00\x00\x00");
+  encode_test(
+      20, "12345678901234567890", //
+      17,
+      "\xff\x31\x32\x33\x34\x35\x36\x37\x38\x03\x39\x30\x00\xa7\x00\x00\x00");
 
   return 0;
 }

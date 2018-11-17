@@ -8,14 +8,13 @@
 
 #ifndef HAVE_FMEMOPEN
 #define HAVE_FMEMOPEN
-#include "mem/fmemopen.h"
+#include "fmemopen.h"
 #endif // HAVE_FMEMOPEN
 
 #ifndef HAVE_OPEN_MEMSTREAM
 #define HAVE_OPEN_MEMSTREAM
-FILE *open_memstream(char **buf, size_t *len);
+#include "open_memstream.h"
 #endif // HAVE_OPEN_MEMSTREAM
-
 
 void *memrmem(const void *v, size_t size, const void *pat, size_t patsize) {
   const char *p = "";
@@ -93,13 +92,9 @@ Window match_window(char *istr, size_t ilen, size_t offset) {
   Window window = {-1, -1};
 
   for (size_t i = MAX_LEN; i > THRESHOLD - 1; i--) {
-    // printf("win %u\n", i);
     window_end = MIN(offset + i, ilen);
-    // printf("win end %u\n", window_end);
-    // printf("offset %u\n", offset);
     // we've not got enough data left for a meaningful result
     if (window_end - offset < THRESHOLD) {
-      // printf("window none\n");
       return window;
     }
 
@@ -114,24 +109,19 @@ Window match_window(char *istr, size_t ilen, size_t offset) {
     for (size_t j = 0; j < in_data_len; j++) {
       *(in_data + j) = *(istr + j + window_start);
     }
-    // printf("find string %s\n", str_to_find);
     ret = memrmem(in_data, in_data_len, str_to_find, str_to_find_len);
     free(str_to_find);
     free(in_data);
 
-    // printf("is %s\n", ret);
     if (ret != NULL) {
       idx = ret - in_data + window_start;
-      // printf("idx %u\n", idx);
       code_offset = offset - idx;
       code_len = window_end - offset;
       window.offset = offset - idx;
       window.length = window_end - offset;
       return window;
     }
-    // printf("\n");
   }
-  // printf("window none\n");
   return window;
 }
 
@@ -162,14 +152,8 @@ size_t Encode(size_t ilen_, char *istr_, size_t olen, char *ostr) {
   char *buf_start = buf;
 
   while (current_pos < ilen) {
-    // printf("current_pos %u\n", current_pos);
-    // printf("input_size %lu\n", ilen);
     flag_byte = 0;
     for (size_t i = 0; i < 8; i++) {
-      // printf("current_pos %u\n", current_pos);
-      // printf("input_size %lu\n", ilen);
-      // printf("buffer %s\n", buf_start);
-      // printf("buflen %lu\n", buflen);
       if (current_pos >= ilen) {
         bit = 0;
       } else {
@@ -177,28 +161,25 @@ size_t Encode(size_t ilen_, char *istr_, size_t olen, char *ostr) {
         if (match.offset != -1) {
           win_pos = match.offset;
           win_length = match.length;
-          // printf("win pos %u\n", win_pos);
-          // printf("win length %u\n", win_length);
           win_info = (win_pos << 4) | ((win_length - THRESHOLD) & 0x0F);
           _put_buf((win_info >> 8) & 0xFF);
           _put_buf((char)win_info);
           bit = 0;
           current_pos += win_length;
         } else {
-          // printf("put buf %c\n", *(istr_start + current_pos));
           _put_buf(*(istr_start + current_pos));
           current_pos += 1;
           bit = 1;
         }
       }
       flag_byte = (flag_byte >> 1) | ((bit & 1) << 7);
-      // printf("\n");
     }
     _put(flag_byte);
-    // printf("put buffers \n");
     for (size_t i = 0; i < buflen; i++) {
       _put(*(buf_start + i));
     }
+    buf = buf_start;
+    buflen = 0;
   }
   _put(0);
   _put(0);

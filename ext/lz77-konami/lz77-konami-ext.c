@@ -5,15 +5,14 @@
 
 #include <ruby.h>
 
-
 #ifndef HAVE_FMEMOPEN
 #define HAVE_FMEMOPEN
-#include "mem/fmemopen.h"
+#include "fmemopen.h"
 #endif // HAVE_FMEMOPEN
 
 #ifndef HAVE_OPEN_MEMSTREAM
 #define HAVE_OPEN_MEMSTREAM
-FILE *open_memstream(char **buf, size_t *len);
+#include "open_memstream.h"
 #endif // HAVE_OPEN_MEMSTREAM
 
 static VALUE encode(VALUE self, VALUE str) {
