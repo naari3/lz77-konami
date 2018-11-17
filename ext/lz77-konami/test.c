@@ -24,7 +24,7 @@ int encode_test(size_t ilen, char *istr, size_t validlen, char *validstr) {
   char *encoded = malloc(ilen * 2);
   size_t olen = Encode(ilen, istr, ilen * 2, encoded);
   if (memcmp(encoded, validstr, olen) == 0 && olen == validlen) {
-    printf("OK\n\n");
+    printf(".\n");
     result = 0;
   } else {
     print_invalid(validstr, validlen, encoded, olen);
@@ -38,7 +38,7 @@ int decode_test(size_t ilen, char *istr, size_t validlen, char *validstr) {
 
   char *decoded = Decode(ilen, istr, &olen);
   if (memcmp(decoded, validstr, olen) == 0 && olen == validlen) {
-    printf("OK\n\n");
+    printf(".\n");
     return 0;
   } else {
     print_invalid(validstr, validlen, decoded, olen);
@@ -49,34 +49,28 @@ int decode_test(size_t ilen, char *istr, size_t validlen, char *validstr) {
 int main() {
   printf("=== decode ===\n");
   printf("just put test\n");
-  for (int i = 0; i < 10; i++)
-    decode_test(8, "\x0f\x61\x61\x61\x61\x00\x00\x00", //
-                4, "aaaa");
+  decode_test(8, "\x0f\x61\x61\x61\x61\x00\x00\x00", //
+              4, "aaaa");
   printf("add from ref test\n");
-  for (int i = 0; i < 10; i++)
-    decode_test(12, "\x0f\x74\x65\x73\x74\x00\x41\x00\x85\x00\x00\x00", //
-                16, "testtesttesttest");
+  decode_test(12, "\x0f\x74\x65\x73\x74\x00\x41\x00\x85\x00\x00\x00", //
+              16, "testtesttesttest");
   printf("add from ref opted test\n");
-  for (int i = 0; i < 10; i++)
-    decode_test(15,
-                "\x07\x61\x61\x61\x00\x30\x00\x63\x00\xc9\x01\x2d\x00\x00\x00",
-                40, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+  decode_test(15,
+              "\x07\x61\x61\x61\x00\x30\x00\x63\x00\xc9\x01\x2d\x00\x00\x00",
+              40, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   // printf("0 padding test\n"); // TODO
 
   printf("=== encode ===\n");
   printf("just put test\n");
-  for (int i = 0; i < 10; i++)
-    encode_test(4, "aaaa", //
-                8, "\x0f\x61\x61\x61\x61\x00\x00\x00");
+  encode_test(4, "aaaa", //
+              8, "\x0f\x61\x61\x61\x61\x00\x00\x00");
   printf("match window test\n");
-  for (int i = 0; i < 10; i++)
-    encode_test(16, "testtesttesttest", //
-                12, "\x0f\x74\x65\x73\x74\x00\x41\x00\x85\x00\x00\x00");
+  encode_test(16, "testtesttesttest", //
+              12, "\x0f\x74\x65\x73\x74\x00\x41\x00\x85\x00\x00\x00");
   printf("match window memrmem test\n");
-  for (int i = 0; i < 10; i++)
-    encode_test(40, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", //
-                15,
-                "\x07\x61\x61\x61\x00\x30\x00\x63\x00\xc9\x01\x2d\x00\x00\x00");
+  encode_test(40, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", //
+              15,
+              "\x07\x61\x61\x61\x00\x30\x00\x63\x00\xc9\x01\x2d\x00\x00\x00");
 
   return 0;
 }
