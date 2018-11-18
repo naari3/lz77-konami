@@ -241,12 +241,15 @@ char *Decode(size_t ilen, char *istr, size_t *olen) {
         }
         if (-1 * position + length < 0) {
           fwrite(ostr + *olen - position, sizeof(char), length, output_str);
+          fflush(output_str);
         } else {
           for (size_t j = 0; j < length; j++) {
             _put(*(ostr + *olen - position));
+            fflush(output_str);
           }
         }
       }
+      fflush(output_str);
     }
   }
   fclose(input_str);
