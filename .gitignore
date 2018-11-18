@@ -8,11 +8,13 @@
 /tmp/
 
 *.o
+*.log
+*py*
 test
 
 .vscode
 
 ext/lz77-konami/.sitearchdir.-.lz77.-.konami.-.lz77.time
 ext/lz77-konami/Makefile
-ext/lz77-konami/konami.bundle
-ext/lz77-konami/mkmf.log
+*.bundle
+mkmf.log
