@@ -90,7 +90,7 @@ int main() {
       true);
 
   printf("=== file test ===\n");
-  FILE *cmpr = fopen("./test_data/aaa.bin", "rb"); // compressed kbin
+  FILE *cmpr = fopen("./test_data/ccc.bin", "rb"); // compressed kbin
   fseek(cmpr, 0L, SEEK_END);
   size_t clen = ftell(cmpr);
   fseek(cmpr, 0L, SEEK_SET);
