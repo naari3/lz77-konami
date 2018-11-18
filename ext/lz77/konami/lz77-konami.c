@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,6 +16,25 @@
 #define HAVE_OPEN_MEMSTREAM
 #include "open_memstream.h"
 #endif // HAVE_OPEN_MEMSTREAM
+
+#ifdef DEBUG
+void print_hex_(char *istr, size_t ilen) {
+  for (int i = 0; i < ilen; i++) {
+    printf("0x%02X ", *(istr + i) & 0x000000FF);
+  }
+  printf("\n");
+}
+void print_debug(const char *format, ...) {
+  va_list ap;
+  va_start(ap, format);
+  vprintf(format, ap);
+  va_end(ap);
+}
+#endif
+#ifndef DEBUG
+void print_hex_(char *istr, size_t ilen) {}
+void print_debug(const char *format, ...) {}
+#endif
 
 void *memrmem(const void *v, size_t size, const void *pat, size_t patsize) {
   const char *p = "";
@@ -92,8 +112,10 @@ Window match_window(char *istr, size_t ilen, size_t offset) {
   Window window = {-1, -1};
 
   for (size_t i = MAX_LEN; i > THRESHOLD - 1; i--) {
+    print_debug("win %lu\n", i);
     window_end = MIN(offset + i, ilen);
     // we've not got enough data left for a meaningful result
+    print_debug("win end %lu\n", window_end);
     if (window_end - offset < THRESHOLD) {
       return window;
     }
@@ -104,6 +126,8 @@ Window match_window(char *istr, size_t ilen, size_t offset) {
       *(str_to_find + j) = *(istr + j + offset);
     }
     *(str_to_find + str_to_find_len) = 0; // for debug
+    print_debug("find: ");
+    print_hex_(str_to_find, str_to_find_len);
     in_data_len = window_end - window_start - i;
     in_data = malloc(in_data_len);
     for (size_t j = 0; j < in_data_len; j++) {
@@ -121,6 +145,7 @@ Window match_window(char *istr, size_t ilen, size_t offset) {
       window.length = window_end - offset;
       return window;
     }
+    print_debug("\n");
   }
   return window;
 }
@@ -152,27 +177,35 @@ size_t Encode(size_t ilen_, char *istr_, size_t olen, char *ostr) {
   char *buf_start = buf;
 
   while (current_pos < ilen) {
+    print_debug("ilen %lu\n", ilen);
+    print_debug("current_pos %lu\n", current_pos);
     flag_byte = 0;
     for (size_t i = 0; i < 8; i++) {
       if (current_pos >= ilen) {
+        print_debug("bit is 0\n");
         bit = 0;
       } else {
         match = match_window(istr, ilen, current_pos);
         if (match.offset != -1) {
           win_pos = match.offset;
           win_length = match.length;
+          print_debug("win pos %lu\n", win_pos);
+          print_debug("win len %lu\n", win_length);
           win_info = (win_pos << 4) | ((win_length - THRESHOLD) & 0x0F);
           _put_buf((win_info >> 8) & 0xFF);
           _put_buf((char)win_info);
+          print_debug("bit is 0\n");
           bit = 0;
           current_pos += win_length;
         } else {
           _put_buf(*(istr_start + current_pos));
           current_pos += 1;
+          print_debug("bit is 1\n");
           bit = 1;
         }
       }
       flag_byte = (flag_byte >> 1) | ((bit & 1) << 7);
+      print_debug("\n");
     }
     _put(flag_byte);
     for (size_t i = 0; i < buflen; i++) {
@@ -180,6 +213,7 @@ size_t Encode(size_t ilen_, char *istr_, size_t olen, char *ostr) {
     }
     buf = buf_start;
     buflen = 0;
+    print_debug("\n");
   }
   _put(0);
   _put(0);
