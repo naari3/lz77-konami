@@ -1,4 +1,4 @@
-# Lz77::Konami
+# LZ77::Konami
 
 konami's lz77
 
